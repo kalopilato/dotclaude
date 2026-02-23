@@ -41,6 +41,8 @@ Create a comprehensive implementation plan that:
 
 **Limit scope**: Don't read every file, just understand the landscape
 
+**If exploration reveals a decision you cannot make without user input** — one that significantly affects the implementation approach — surface it before writing the plan. Present the decision clearly with the available options and wait for guidance. Don't guess on architectural decisions.
+
 ### Step 3: Assess Scope
 
 **Count potential steps**:
@@ -83,6 +85,36 @@ Create a comprehensive implementation plan that:
   **Suggested approach**: Create these as separate tickets and implement sequentially. This provides better review checkpoints and reduces risk.
 
   Would you like me to proceed with planning the full scope anyway, or would you prefer to split this ticket first?
+  ```
+
+- Create `ticket-split-suggestion.md` in the workspace:
+
+  ```markdown
+  # Ticket Split: {TICKET-ID}
+
+  Estimated {count} steps — too large for a single implementation cycle.
+
+  ## Suggested Sub-tickets
+
+  ### Sub-ticket 1: {Focus area}
+
+  **Scope**:
+  - {Step summary}
+  - {Step summary}
+
+  ### Sub-ticket 2: {Focus area}
+
+  **Scope**:
+  - {Step summary}
+  - {Step summary}
+
+  ## Implementation Order
+
+  1. {Sub-ticket 1 title}
+  2. {Sub-ticket 2 title} — depends on sub-ticket 1
+
+  ---
+  *Use this file to create child tickets in the ticket system.*
   ```
 
 ### Step 4: Create Implementation Plan
@@ -166,6 +198,7 @@ Output:
 
 **Files Created**:
 - `implementation-plan.md` - Detailed step-by-step plan
+- `ticket-split-suggestion.md` - Suggested sub-tickets {only if scope was too large}
 
 **What's Next**:
 

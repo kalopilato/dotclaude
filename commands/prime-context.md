@@ -7,9 +7,13 @@ description: Prime context with project structure and documentation
 
 ## Run the following command
 
-eza . --tree --git-ignore --level=4
+Check if `eza` is available and run the appropriate command:
+
+- If available: `eza . --tree --git-ignore --level=4`
+- If not available: use the Glob tool to explore the directory structure (e.g. pattern `**/*` to survey top-level layout)
 
 ## Read the following files
-> Read the files below and nothing else.
+
+> Read files that exist. Skip any that are not present.
 
 README.md

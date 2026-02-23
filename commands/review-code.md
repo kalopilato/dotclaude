@@ -479,7 +479,8 @@ Use the appropriate output format based on mode (see Output Formats section belo
 
 ---
 
-**Next**: Fix issues and run `/review-code {TICKET-ID}` again to verify
+**Next**: {If blockers found:} Fix blockers and run `/review-code {TICKET-ID}` again to verify
+{If no blockers:} Run the `change-request-writer` agent to draft a change request description
 ```
 
 ## Review Quality Guidelines
@@ -551,6 +552,7 @@ When you see these, call them out positively:
 **For Self Review Mode**:
 - Provide direct action items
 - Suggest running `/review-code {TICKET-ID}` again after fixes to verify
+- When the review passes with no blockers, suggest running the `change-request-writer` agent to draft a change request description
 
 ## Error Handling
 

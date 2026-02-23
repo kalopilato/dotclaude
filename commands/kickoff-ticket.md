@@ -110,6 +110,8 @@ Workspace initialized for **{TICKET-ID}: {Title}**
 
 **What's Next**:
 
+If you haven't already, run `/prime-context` in the project to load its structure into context.
+
 Run `/analyze-ticket` to extract requirements and identify gaps.
 
 The ticket and comments are now loaded in conversation context and will be available for subsequent commands without re-fetching.
@@ -146,6 +148,8 @@ Workspace initialized for **PROJ-142: Add email notification preferences**
 - `ticket-info.md` - Basic ticket information
 
 **What's Next**:
+
+If you haven't already, run `/prime-context` in the project to load its structure into context.
 
 Run `/analyze-ticket` to extract requirements and identify gaps.
 

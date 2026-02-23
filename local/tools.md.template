@@ -31,9 +31,3 @@ git.mycompany.com = gh
 gitlab.internal.co = glab
 ```
 
-## Conventions (optional)
-
-Add any org-specific conventions here:
-- Branch naming: (e.g., `{ticket-id}-{slug}`)
-- Commit format: (e.g., conventional commits)
-- PR template location: (e.g., `.github/pull_request_template.md`)

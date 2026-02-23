@@ -100,6 +100,27 @@ Look for:
 
 **For each gap**: Document it clearly, don't try to answer by investigating code
 
+**What qualifies as a blocker question**: An answer is a blocker if you cannot choose an implementation approach without it — no reasonable assumption can substitute. If you can make a confident assumption from context, document it as an assumption instead of asking.
+
+### Step 4.5: Assess Ticket Readiness
+
+Before creating output documents, assess whether the ticket is ready to implement:
+
+**Ready for implementation** — all of the following are true:
+
+- Requirements are clear with no significant contradictions
+- Some form of acceptance criteria or definition of done exists
+- Scope is bounded and implementation can begin without major open decisions
+
+**Needs refinement** — any of the following:
+
+- No acceptance criteria at all
+- Contradicting or mutually exclusive requirements
+- Scope is unclear or unbounded
+- Key decisions remain unmade that would block starting implementation
+
+If **Needs refinement**, include a `## Ticket Readiness` section in `requirements-analysis.md` with specific issues found and suggested improvements to the ticket description. This is feedback for whoever owns the ticket — not just gaps for the developer to work around.
+
 ### Step 5: Create Output Documents
 
 #### File 1: `requirements-analysis.md`
@@ -135,6 +156,20 @@ Look for:
 - {Acceptance criterion 1}
 - {Observable outcome 1}
 - {Testable result 1}
+
+## Ticket Readiness
+
+{Omit this section if ready for implementation}
+
+**Status**: Needs refinement before starting
+
+**Issues**:
+- {e.g., No acceptance criteria defined}
+- {e.g., Requirement X contradicts requirement Y}
+
+**Suggested improvements**:
+- {e.g., Define what "success" looks like for the notification dispatch change}
+- {e.g., Clarify whether preferences are per-user or per-workspace before starting}
 ```
 
 **Keep it tight**:
@@ -182,6 +217,9 @@ Output:
 **Complexity**: {Simple/Medium/Complex}
 {1 sentence reasoning}
 
+**Ticket Readiness**: Ready for implementation / Needs refinement
+{If needs refinement: 1 sentence on the key issue}
+
 **Files Created**:
 - `requirements-analysis.md` - Requirements breakdown ({X} lines)
 - `questions.md` - {X} questions requiring confirmation
@@ -203,9 +241,10 @@ The ticket information remains in conversation context for planning.
 2. **Focus on ticket content**: Description, comments, acceptance criteria
 3. **Be ruthlessly concise**: Every sentence must add value
 4. **Scannable format**: Bullets, not paragraphs
-5. **Minimal questions**: Only ask blockers, not nice-to-knows
-6. **Under 200 lines**: Keep requirements-analysis.md tight
-7. **Stay in conversation**: Maintain context for next command
+5. **Minimal questions**: Only ask blockers — questions where no reasonable assumption can substitute
+6. **Assess readiness**: Flag tickets that need refinement before implementation starts
+7. **Under 200 lines**: Keep `requirements-analysis.md` tight
+8. **Stay in conversation**: Maintain context for next command
 
 ## What NOT to Do
 
