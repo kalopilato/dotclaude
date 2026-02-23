@@ -1,0 +1,39 @@
+# Tool Configuration
+
+Configure your specific tools below. Commands and agents reference this file
+for tool-specific details.
+
+Copy this file to `tools.md` in the same directory and fill in your values.
+
+## Ticket System
+
+- **Tool**: (e.g., Linear MCP, Jira MCP, GitHub Issues)
+- **MCP fetch command**: (e.g., `mcp__linear-server__get_issue`)
+- **MCP comments command**: (e.g., `mcp__linear-server__list_comments`)
+- **URL pattern**: (e.g., `https://linear.app/org/issue/ID/...`)
+- **ID format**: (e.g., `PB-752`, `PROJ-123`)
+
+## Workspace (optional)
+
+Override the default workspace directory (`.ai-workspace/`):
+- **Directory**: (e.g., `tmp`, `.workspace`, `_tickets`)
+
+## Git Provider Overrides (optional)
+
+Git provider and CLI tool are auto-detected from `git remote get-url origin`:
+- `github.com` → `gh`
+- `gitlab.com` → `glab`
+
+Only add overrides here for self-hosted instances or non-standard setups:
+
+```
+git.mycompany.com = gh
+gitlab.internal.co = glab
+```
+
+## Conventions (optional)
+
+Add any org-specific conventions here:
+- Branch naming: (e.g., `{ticket-id}-{slug}`)
+- Commit format: (e.g., conventional commits)
+- PR template location: (e.g., `.github/pull_request_template.md`)
