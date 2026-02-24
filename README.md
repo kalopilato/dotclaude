@@ -19,7 +19,7 @@ A portable collection of Claude Code commands and agents for AI-assisted softwar
 ## Workflow
 
 ```mermaid
-flowchart LR
+flowchart TD
     PC("/prime-context")
     KT("/kickoff-ticket")
     AT("/analyze-ticket")
@@ -28,14 +28,28 @@ flowchart LR
     RC("/review-code")
     CRW(["change-request-writer\nagent"])
 
-    PC -.->|"run in project first"| KT
+    U1["review analysis\nanswer questions"]
+    U2["review changes\niterate if needed"]
+    U3["fix issues"]
+
+    PC -.->|"once per project"| KT
     KT --> AT
-    AT --> PT
+    AT --> U1
+    U1 -->|"ready"| PT
     PT --> ES
-    ES -->|"repeat per step"| ES
-    ES --> RC
-    RC -->|"fix & repeat"| RC
-    RC --> CRW
+    ES --> U2
+    U2 -->|"next step"| ES
+    U2 -->|"all done"| RC
+    RC --> U3
+    U3 -->|"re-review"| RC
+    RC -.->|"no blockers"| CRW
+
+    classDef cmd fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    classDef user fill:#f3f4f6,stroke:#9ca3af,color:#374151
+    classDef agent fill:#dcfce7,stroke:#16a34a,color:#14532d
+    class PC,KT,AT,PT,ES,RC cmd
+    class U1,U2,U3 user
+    class CRW agent
 ```
 
 ### Commands
