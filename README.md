@@ -12,7 +12,7 @@ A portable collection of Claude Code commands and agents for AI-assisted softwar
 
 **Conversation as glue.** Ticket data and requirements flow through conversation context across pipeline steps, avoiding redundant fetches. Workspace files persist state across sessions so work can be resumed in a new conversation without losing progress.
 
-**Tool-agnostic.** Ticket system, git CLI, and workspace location are configured in a gitignored `local/tools.md` — keeping the workflow portable across teams and setups.
+**Zero configuration.** The ticket system is discovered from whatever MCP tools are connected. The git provider is detected from the remote URL. Nothing to configure before you start.
 
 ---
 
@@ -77,35 +77,22 @@ flowchart LR
 
 ## Setup
 
-### Fresh install
-
-If you don't have an existing `~/.claude/` directory:
+At some point I'd like to make this 'installable' somehow (Claude plugin maybe? TBD), but for now just copy the files you want into `~/.claude/` and customize as needed:
 
 ```bash
-git clone <repo-url> ~/.claude
+cp commands/*.md ~/.claude/commands/
+cp agents/*.md ~/.claude/agents/
+cp CLAUDE.md ~/.claude/CLAUDE.md
 ```
 
-Claude Code loads commands and agents from `~/.claude/` automatically.
+That's it. The commands are immediately available as `/kickoff-ticket`, `/execute-step`, etc.
 
-### Merge into an existing `~/.claude/`
+To get updates, pull the repo and re-copy.
 
-If you already manage `~/.claude/` as a git repository with your own configuration:
+### Prerequisites
 
-```bash
-cd ~/.claude
-git remote add dotclaude <repo-url>
-git fetch dotclaude
-git merge dotclaude/main --allow-unrelated-histories
-```
-
-Pull future updates:
-
-```bash
-git fetch dotclaude
-git merge dotclaude/main
-```
-
-Resolve any merge conflicts by keeping your local customisations where they diverge.
+- A ticket system MCP connected in Claude Code (Linear, GitHub Issues, etc.) — needed for `/kickoff-ticket` and `/analyze-ticket`
+- `gh` or `glab` CLI installed — needed for PR/MR operations in `/review-code`
 
 ### Global gitignore
 
@@ -118,43 +105,11 @@ git config --global core.excludesfile ~/.gitignore_global
 
 ---
 
-## Configuration
-
-### 1. Copy the tools template
-
-```bash
-cp ~/.claude/local/tools.md.template ~/.claude/local/tools.md
-```
-
-### 2. Fill in your tools
-
-Edit `local/tools.md` with your actual setup:
-
-```markdown
-## Ticket System
-- Tool: Linear MCP
-- MCP fetch command: `mcp__linear-server__get_issue`
-- MCP comments command: `mcp__linear-server__list_comments`
-- ID format: PB-752
-
-## Workspace (optional)
-- Directory: tmp    ← override default (.ai-workspace/)
-```
-
-The git provider CLI (`gh` or `glab`) is auto-detected from `git remote get-url origin`. Override only if you're using an alternative provider or self-hosted instance.
-
-`local/tools.md` is gitignored — your credentials and org-specific config stay out of the shared repo.
-
----
-
 ## Directory structure
 
 ```
 ~/.claude/
-├── CLAUDE.md                       # Root config: workspace dir, git provider detection
-├── local/
-│   ├── tools.md.template           # Copy this and fill in your tools
-│   └── tools.md                    # Your config (gitignored)
+├── CLAUDE.md                       # Workspace directory default
 ├── commands/
 │   ├── prime-context.md
 │   ├── kickoff-ticket.md

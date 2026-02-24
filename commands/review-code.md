@@ -40,11 +40,16 @@ You automatically adapt your review style based on context:
 
 ### Phase 0: Detect Review Mode
 
-1. **Get git provider CLI**
+1. **Detect git provider CLI**
 
-   Read the **CLI** value from `local/tools.md` under "Git Provider". Use it for all git provider operations below (PR/MR listing, viewing, commenting).
+   Run `git remote get-url origin` and map the host to a CLI tool:
 
-   If no CLI is configured, fall back to SELF REVIEW MODE and tell the user to add it to `local/tools.md`.
+   - `github.com` → `gh`
+   - `gitlab.com` or self-hosted GitLab → `glab`
+   - `bitbucket.org` → fall back to SELF REVIEW MODE (no standard CLI)
+   - Unrecognized host → fall back to SELF REVIEW MODE, inform user
+
+   Use the detected CLI for all git provider operations below (PR/MR listing, viewing, commenting).
 
 2. **Parse command arguments**
    - Ticket ID/URL (required)
@@ -98,7 +103,7 @@ You automatically adapt your review style based on context:
 5. **Fetch ticket**
    - Check if ticket already in conversation context (look for recent ticket system MCP responses)
    - If found: Use cached data
-   - If not found: Use the ticket system MCP tools configured in `local/tools.md` to fetch the ticket and comments
+   - If not found: Use the available ticket system MCP tool to fetch the ticket and comments
    - Extract and store:
      - Requirements and acceptance criteria
      - Key decisions from comments
@@ -563,7 +568,7 @@ When you see these, call them out positively:
 ## Error Handling
 
 - If git commands fail: Inform user and suggest checking branch status
-- If git CLI not configured in `local/tools.md`: Fall back to SELF REVIEW MODE, tell user to add it
+- If git CLI cannot be detected from remote URL: Fall back to SELF REVIEW MODE, inform user
 - If ticket not found: Ask user to verify ticket ID
 - If `/prime-context` not run: Suggest running it, but proceed if user declines
 - If diff is very large (>1000 lines): Focus on most critical files, inform user review is partial

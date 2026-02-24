@@ -20,7 +20,8 @@ Analyze a ticket to:
 ### Step 1: Load Ticket Information
 
 **Check conversation context first**:
-- Look for recent ticket system tool responses (the fetch and comments commands configured in `@local/tools.md`)
+
+- Look for recent ticket system MCP tool responses
 - If found in recent conversation: Use cached data (saves API calls)
 - If not found: Fetch using the configured ticket system tool
 
@@ -296,7 +297,7 @@ Multiple components involved (DB, backend, frontend, tests) but clear scope.
 - **No ticket in context and no ticket ID provided**: "Please provide a ticket ID or run `/kickoff-ticket` first."
 - **Ticket not found**: "Could not find ticket {ID}. Please verify the ticket ID."
 - **No workspace found**: "No workspace found for {TICKET-ID}. Run `/kickoff-ticket` first."
-- **Ticket system tool not available**: "Ticket system tool is not available. Check `local/tools.md` configuration."
+- **Ticket system tool not available**: "No ticket system MCP tool is available. Please ensure a ticket system MCP is configured and connected."
 
 ## Conversation Context
 

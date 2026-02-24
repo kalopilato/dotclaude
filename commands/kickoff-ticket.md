@@ -25,11 +25,7 @@ Extract the ticket ID from the input.
 
 ### Step 2: Fetch Ticket
 
-Use the ticket system's tools (see `local/tools.md`) to fetch full ticket details:
-
-```
-Use the configured ticket tool to fetch the ticket's full details including title, description, url, status, and comments.
-```
+Use whichever ticket system MCP tool is available to fetch the ticket's full details including title, description, url, status, and comments.
 
 Store in conversation context:
 - Ticket title
@@ -128,7 +124,7 @@ The ticket and comments are now loaded in conversation context and will be avail
 ## Error Handling
 
 - **Ticket not found**: "Could not find ticket {ID}. Please verify the ticket ID or URL."
-- **Ticket system tool not available**: "Ticket system tool is not available. Check `local/tools.md` configuration."
+- **Ticket system tool not available**: "No ticket system MCP tool is available. Please ensure a ticket system MCP is configured and connected."
 - **Cannot create workspace**: "Could not create workspace directory. Please check permissions."
 
 ## Example Usage
