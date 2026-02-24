@@ -40,14 +40,20 @@ You automatically adapt your review style based on context:
 
 ### Phase 0: Detect Review Mode
 
-1. **Parse command arguments**
+1. **Get git provider CLI**
+
+   Read the **CLI** value from `local/tools.md` under "Git Provider". Use it for all git provider operations below (PR/MR listing, viewing, commenting).
+
+   If no CLI is configured, fall back to SELF REVIEW MODE and tell the user to add it to `local/tools.md`.
+
+2. **Parse command arguments**
    - Ticket ID/URL (required)
    - PR number (optional)
    - Mode flags: `--self` or `--peer` (optional overrides)
 
-2. **Detect review mode**
+3. **Detect review mode**
    - Get the current branch name
-   - Check if a PR/MR exists for this branch
+   - Check if a PR/MR exists for this branch using `{GIT_CLI}`
    - If found, check whether the current user is the author
 
    - If `--self` flag: Force SELF REVIEW MODE
@@ -58,7 +64,7 @@ You automatically adapt your review style based on context:
    - If PR found for branch AND PR author == current user: SELF REVIEW MODE (you're reviewing your own PR)
    - Otherwise: SELF REVIEW MODE
 
-3. **Inform user of mode**
+4. **Inform user of mode**
    ```
    Found PR #123 for branch `feature-branch` (author: @you)
    Running in SELF REVIEW MODE (reviewing your own PR)
@@ -557,7 +563,7 @@ When you see these, call them out positively:
 ## Error Handling
 
 - If git commands fail: Inform user and suggest checking branch status
-- If git CLI tool not available: Fall back to SELF REVIEW MODE, inform user
+- If git CLI not configured in `local/tools.md`: Fall back to SELF REVIEW MODE, tell user to add it
 - If ticket not found: Ask user to verify ticket ID
 - If `/prime-context` not run: Suggest running it, but proceed if user declines
 - If diff is very large (>1000 lines): Focus on most critical files, inform user review is partial

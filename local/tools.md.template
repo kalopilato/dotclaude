@@ -18,13 +18,11 @@ Copy this file to `tools.md` in the same directory and fill in your values.
 Override the default workspace directory (`.ai-workspace/`):
 - **Directory**: (e.g., `tmp`, `.workspace`, `_tickets`)
 
-## Git Provider Overrides (optional)
+## Git Provider
 
-Git provider and CLI tool are auto-detected from `git remote get-url origin`:
-- `github.com` → `gh`
-- `gitlab.com` → `glab`
+- **CLI**: (e.g., `gh` for GitHub, `glab` for GitLab)
 
-Only add overrides here for self-hosted instances or non-standard setups:
+For self-hosted instances, add hostname mappings:
 
 ```
 git.mycompany.com = gh
