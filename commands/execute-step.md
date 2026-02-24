@@ -169,7 +169,7 @@ Use Edit tool to update `implementation-plan.md`
 
 Output:
 
-```markdown
+````markdown
 ## ✅ Step {n} Complete: {Title}
 
 **Implemented**:
@@ -187,10 +187,33 @@ Output:
 - {Verification result 1}
 - {Verification result 2}
 
+### Commit
+
+{See commit guidance below — output one of:}
+
+**Commit now** — this step is self-contained and independently revertible.
+
+```text
+{subject line — imperative, ≤72 chars, matching project convention}
+
+{body — only if needed: explain WHY, not WHAT. The diff shows the what.
+Omit if the subject line is self-explanatory.}
+```
+
+{OR}
+
+**Group with step {n+1}** — {brief reason, e.g. "the model in step 2 depends on this migration and they form one logical unit"}. Suggested message when ready:
+
+```text
+{subject line covering both steps}
+
+{body explaining the combined why, if needed}
+```
+
 **Next**:
 - Review the changes above
 - Run `/execute-step` to continue with step {n+1}
-```
+````
 
 ### Step 10: Wait for User
 
@@ -210,11 +233,27 @@ Wait for user to:
 Make changes and re-verify before moving on.
 
 
-## Commit Messages (if user requests)
+## Commit Guidance
 
-Follow the repository's commit message conventions for the first line — check recent commits with `git log --oneline` to match the style.
+At the end of each step, assess whether it's a logical commit point and suggest accordingly.
 
-Add a description body only if it genuinely adds context (e.g. why a decision was made, what wasn't obvious). Omit it if the subject line is self-explanatory.
+**Commit now** when:
+
+- The step is independently revertible without breaking other steps
+- Tests pass and the codebase is in a working state
+- The change is atomic (migrations are almost always their own commit)
+
+**Group with next step** when:
+
+- The next step depends on the current state to compile or pass tests
+- The two steps together form a single logical unit of work (e.g. migration + model, endpoint + serializer)
+
+**Message format**:
+
+Check `git log --oneline` to match the project's commit convention (e.g. conventional commits, ticket-prefixed, etc.).
+
+- **Subject line**: imperative mood, ≤72 chars, describes *what* changed concisely
+- **Body** (only if it adds value): explain *why* — the motivation, trade-off, or context that isn't obvious from reading the diff. Never restate the diff in prose. Omit the body entirely if the subject is self-explanatory.
 
 ## Important Guidelines
 
