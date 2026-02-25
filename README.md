@@ -26,29 +26,31 @@ flowchart TD
     PT("/plan-ticket")
     ES("/execute-step")
     RC("/review-code")
-    CRW(["change-request-writer\nagent"])
+    CRW(["change-request-writer agent"])
 
-    U1["review analysis\nanswer questions"]
-    U2["review changes\niterate if needed"]
-    U3["fix issues"]
+    U1["review analysis · answer questions"]
+    U2["review plan · iterate with agent"]
+    U3["review changes · iterate if needed"]
+    U4["fix issues"]
 
-    PC -.->|"once per project"| KT
     KT --> AT
     AT --> U1
-    U1 -->|"ready"| PT
-    PT --> ES
-    ES --> U2
-    U2 -->|"next step"| ES
-    U2 -->|"all done"| RC
-    RC --> U3
-    U3 -->|"re-review"| RC
-    RC -.->|"no blockers"| CRW
+    U1 --> PC
+    PC --> PT
+    PT --> U2
+    U2 --> ES
+    ES --> U3
+    U3 -->|"next step"| ES
+    U3 -->|"steps completed"| RC
+    RC --> U4
+    U4 -->|"re-review"| RC
+    RC -.-> CRW
 
     classDef cmd fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
     classDef user fill:#f3f4f6,stroke:#9ca3af,color:#374151
     classDef agent fill:#dcfce7,stroke:#16a34a,color:#14532d
     class PC,KT,AT,PT,ES,RC cmd
-    class U1,U2,U3 user
+    class U1,U2,U3,U4 user
     class CRW agent
 ```
 
