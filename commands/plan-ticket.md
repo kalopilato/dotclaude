@@ -190,14 +190,25 @@ Every step must have a `**Commit**` field. Use `After this step` when the step i
 
 When steps are grouped, the *last* step in the group says `After this step — closes group with step N`. Earlier steps in the group say `With step N`.
 
-Commit groups should be visible in the plan summary (see Step 5) so the user can review the grouping before execution starts.
+Commit groups should be visible in the plan summary (see Step 6) so the user can review the grouping before execution starts.
 
 **Step Size**:
 - Good: "Add `enabled` column to `notification_preferences` table"
 - Too large: "Implement notification preferences"
 - Too small: "Add import statement"
 
-### Step 5: Present Plan
+### Step 5: Validate Plan Against Conventions
+
+Before presenting the plan, review each step through the lens of a future code reviewer:
+
+- Does the approach follow the patterns found in Step 2, or does it deviate without a clear reason?
+- Would any step surprise a developer familiar with this codebase — unexpected file placement, unusual abstractions, inconsistent naming, or a different pattern from how similar things are done?
+- Are there existing utilities, base classes, or helpers that should be used but aren't?
+- Does the layering (where logic lives) match how the project is structured?
+
+**Revise the draft** before writing the file — fix any steps that would be jarring or inconsistent. If a deviation is intentional and justified, note it explicitly in the step's **Why** field so the reviewer understands it was a deliberate choice.
+
+### Step 6: Present Plan
 
 Output:
 
@@ -235,7 +246,7 @@ Review the plan in `implementation-plan.md`. You can:
 When ready to start implementing, run `/execute-step` to begin step 1.
 ```
 
-### Step 6: Support Iteration
+### Step 7: Support Iteration
 
 **Stay in conversation** to support refinement:
 - "Can you add more detail to step 3?"
