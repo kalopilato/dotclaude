@@ -1,18 +1,37 @@
 # dotclaude
 
-A portable collection of Claude Code commands and agents for AI-assisted software engineering. Implements a structured ticket-to-change-request workflow that adapts to any tech stack, ticket system, or git host.
+My current, (mostly) portable Claude-assisted engineering workflow to help turn tickets into pull requests based around a simple idea: implementation isn't the bottleneck - specification and verification are. That's where my attention should be.
+
+**[Full philosophy and lessons learned →](docs/philosophy.md)**
 
 ---
 
-## Philosophy
+## Principles (the short version)
 
-**Intent-based, not prescriptive.** Commands describe *what* to achieve, not *how*. The AI discovers your project's tools, patterns, and conventions at runtime from the project's own `CLAUDE.md` and codebase — so the same workflow adapts to a Rails monolith, a Go microservice, or a TypeScript frontend without reconfiguration.
+- **Specification is the product** — Clear requirements in, good results out
+- **Verification builds trust** — AI earns autonomy, we don't trust it by default
+- **Artifacts over memory** — Context is hard to manage and hard to reason about, files on disk endure
+- **Human-in-the-loop (for now)** — Review agent output at checkpoints, widen the checkpoints as confidence grows
+- **Portable by default** — Discover tools at runtime, don't bake them into the workflow
 
-**Human in the loop.** Each command is an explicit invocation. The implementation pipeline waits for human review between steps — the AI does the work, you decide when to continue.
+---
 
-**Conversation as glue.** Ticket data and requirements flow through conversation context across pipeline steps, avoiding redundant fetches. Workspace files persist state across sessions so work can be resumed in a new conversation without losing progress.
+## Commands
 
-**Zero configuration.** The ticket system is discovered from whatever MCP tools are connected. The git provider is detected from the remote URL. Nothing to configure before you start.
+| Command | Purpose | Output |
+| --- | --- | --- |
+| `/kickoff-ticket` | Fetch ticket, create workspace | `ticket-info.md` |
+| `/analyze-ticket` | Extract requirements, surface gaps and blockers | `requirements-analysis.md`, `questions.md` |
+| `/prime-context` | Load project structure and docs into context | — |
+| `/plan-ticket` | Create step-by-step implementation plan | `implementation-plan.md` |
+| `/execute-step` | Implement one step with verification | Updates `implementation-plan.md` |
+| `/review-code` | Self-review against requirements and standards | — |
+
+## Agent
+
+| Agent | Purpose | Output |
+| --- | --- | --- |
+| `change-request-writer` | Draft PR/MR description from diff and ticket context | `change-request-draft.md` |
 
 ---
 
@@ -33,6 +52,12 @@ flowchart TD
     U3["review changes · iterate if needed"]
     U4["fix issues"]
 
+    D1["ticket-info.md"]
+    D2["requirements-analysis.md · questions.md"]
+    D3["implementation-plan.md"]
+    D4["code-review.md"]
+    D5["change-request-draft.md"]
+
     KT --> AT
     AT --> U1
     U1 --> PC
@@ -46,73 +71,94 @@ flowchart TD
     U4 -->|"re-review"| RC
     RC -.-> CRW
 
+    KT -.-> D1
+    AT -.-> D2
+    PT -.-> D3
+    ES -. updates .-> D3
+    RC -.-> D4
+    CRW -.-> D5
+
     classDef cmd fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
     classDef user fill:#f3f4f6,stroke:#9ca3af,color:#374151
     classDef agent fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef doc fill:#fef9c3,stroke:#ca8a04,color:#713f12
     class PC,KT,AT,PT,ES,RC cmd
     class U1,U2,U3,U4 user
     class CRW agent
+    class D1,D2,D3,D4,D5 doc
 ```
 
-### Commands
+## Typical session
 
-| Command | What it does | Creates |
-|---------|-------------|---------|
-| `/prime-context` | Load project structure and docs into context | — |
-| `/kickoff-ticket` | Fetch ticket, create workspace directory | `ticket-info.md` |
-| `/analyze-ticket` | Extract requirements, assess ticket readiness, identify blockers | `requirements-analysis.md`, `questions.md` |
-| `/plan-ticket` | Create step-by-step implementation plan | `implementation-plan.md` |
-| `/execute-step` | Implement one step: code + tests + verification | progress in `implementation-plan.md` |
-| `/review-code` | Self or peer code review against ticket requirements | — |
-
-### Agent
-
-| Agent | What it does | Creates |
-|-------|-------------|---------|
-| `change-request-writer` | Draft change request description from git diff and ticket context | `change-request-draft.md` |
-
-### Typical session
-
-```
-/prime-context                  # Load project structure
-/kickoff-ticket PROJ-142        # Fetch ticket, create workspace
+```bash
+/kickoff-ticket PROJ-142        # Fetch ticket, create workspace on disk
 /analyze-ticket                 # Extract requirements, flag gaps
-# → answer any blocker questions
+
+# → review analysis, answer any questions, add any context missing from the ticket
+
+/prime-context                  # Load project structure
 /plan-ticket                    # Create implementation plan
-# → review plan, refine if needed
+
+# → review plan, refine if needed, iterate with the agent until it's solid
+
 /execute-step                   # Implement step 1
-# → review changes, iterate
-/execute-step                   # Implement step 2
-# → ... repeat until all steps done
-/review-code PROJ-142           # Self-review before submitting
-# → fix any issues, re-review
-# → run change-request-writer agent to draft description
+
+# → review, iterate with the agent if needed, agent updates plan as we go
+
+/execute-step                   # Implement step 2 ...
+
+# → review, iterate with the agent if needed, agent updates plan as we go
+
+# → repeat until complete
+
+/review-code                    # Self-review before PR - using existing or clean context
+
+# → invoke change-request-writer agent
 ```
+
+## Generated workspace structure
+
+Each ticket creates a workspace directory in your project, with artifacts generated as we progress through the workflow:
+
+```
+.ai-workspace/
+└── PROJ-142_add-email-preferences/
+    ├── ticket-info.md              # Ticket details (for session resume)
+    ├── requirements-analysis.md    # Requirements + readiness assessment
+    ├── questions.md                # Blockers and open questions
+    ├── implementation-plan.md      # Steps with [TODO]/[DONE] tracking and evaluation of magnitude/complexity
+    └── change-request-draft.md     # Generated PR description
+```
+
+These files enable session resume - return to a ticket in a new conversation and `/execute-step` can pick up where you left off.
 
 ---
 
 ## Setup
 
-At some point I'd like to make this 'installable' somehow (Claude plugin maybe? TBD), but for now just copy the files you want into `~/.claude/` and customize as needed:
+Copy the files into your user-level Claude configuration:
 
 ```bash
-cp commands/*.md ~/.claude/commands/
-cp agents/*.md ~/.claude/agents/
-cp CLAUDE.md ~/.claude/CLAUDE.md
+# Clone the repo
+git clone https://github.com/kalopilato/dotclaude.git
+cd dotclaude
+
+# Copy to your Claude config
+cp -r commands ~/.claude/
+cp -r agents ~/.claude/
+cp CLAUDE.md ~/.claude/
 ```
 
-That's it. The commands are immediately available as `/kickoff-ticket`, `/execute-step`, etc.
-
-To get updates, pull the repo and re-copy.
+Commands are available as `/kickoff-ticket`, `/execute-step`, etc in any new conversation.
 
 ### Prerequisites
 
-- A ticket system MCP connected in Claude Code (Linear, GitHub Issues, etc.) — needed for `/kickoff-ticket` and `/analyze-ticket`
-- `gh` or `glab` CLI installed — needed for PR/MR operations in `/review-code`
+- **Ticket system**: An MCP connection to your ticket system (Linear, Jira, GitHub Issues, etc.)
+- **Git CLI**: `gh` (GitHub) or `glab` (GitLab) for PR/MR operations
 
 ### Global gitignore
 
-Workspace files are generated per-project and shouldn't be committed to your projects. Add `.ai-workspace/` to your global gitignore:
+Workspace files shouldn't be committed to your projects:
 
 ```bash
 echo ".ai-workspace/" >> ~/.gitignore_global
@@ -121,11 +167,48 @@ git config --global core.excludesfile ~/.gitignore_global
 
 ---
 
-## Directory structure
+## Current status
+
+**What works:**
+
+- Core workflow is effective - has been my daily driver for around a year now (though it has iteratively improved over that time)
+- I estimate approximately 2-3x efficiency gains on well-specified tickets
+- Single-conversation context accumulation maintains the level of context I want as I move through the workflow
+- Artifacts for persistence and review-ability work well - I'm no longer concerned about what I'll lose if I `/compact` or `/clear`
+
+**What's rough:**
+
+- Manual invocation at each step - this is a presentation of **Verification builds trust** and is reducing over time
+- No automated verification layer - I see this as key to increased autonomy and efficiency, but non-trivial to do well
+- Some tool-specific references need abstraction
+
+---
+
+## Roadmap
+
+**Near term:**
+
+- Genericize tool references (ticket system, git provider)
+- Consolidate setup commands (`/start-ticket` combining kickoff + analyze + prime)
+- Migrate to Claude skills for better structure
+
+**Next iteration:**
+
+- Verification agents (requirements, standards, adversarial review)
+- Execution logging with drift summary
+- Clearer documentation of decisions made during execution (for better review and session resume)
+- Auto-correction loop before surfacing for human review
+- Tiered execution modes (stepwise → checkpoint → autonomous)
+
+For more thinking on where this is heading, see [docs/philosophy.md](docs/philosophy.md).
+
+---
+
+## Claude Directory structure
 
 ```
 ~/.claude/
-├── CLAUDE.md                       # Workspace directory default
+├── CLAUDE.md                       # Workspace directory config
 ├── commands/
 │   ├── prime-context.md
 │   ├── kickoff-ticket.md
@@ -137,18 +220,14 @@ git config --global core.excludesfile ~/.gitignore_global
     └── change-request-writer.md
 ```
 
-### Workspace anatomy
+---
 
-Each ticket creates a directory in `.ai-workspace/` inside your project:
+## Contributing
 
-```
-.ai-workspace/
-└── PROJ-142_add-email-notification-preferences/
-    ├── ticket-info.md              # Ticket details (for session resume)
-    ├── requirements-analysis.md   # Requirements + readiness assessment
-    ├── questions.md                # Blocker questions (if any)
-    ├── implementation-plan.md      # Step-by-step plan with [TODO]/[DONE] tracking
-    └── change-request-draft.md    # Generated change request description
-```
+This is a personal workflow shared in case it's useful. If you try it and something doesn't work, or you extend it in interesting ways, I'd love to hear about it.
 
-These files double as session resume artifacts — if you start a ticket on Monday and return Wednesday in a new conversation, `/execute-step` reads them to restore context automatically.
+---
+
+## License
+
+MIT
