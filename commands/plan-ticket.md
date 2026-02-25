@@ -147,11 +147,23 @@ Create a comprehensive implementation plan that:
 **Verification**:
 - {How to verify this step works — automated test command and/or manual check}
 
+**Commit**: After this step — {reason, e.g. "standalone migration, independently revertible"}
+
 ---
 
 ## [TODO] Step 2: {Short description}
 
 ...
+
+**Commit**: With step 3 — {reason, e.g. "endpoint depends on serializer, they form one logical unit"}
+
+---
+
+## [TODO] Step 3: {Short description}
+
+...
+
+**Commit**: After this step — closes group with step 2
 
 ---
 
@@ -171,6 +183,14 @@ Create a comprehensive implementation plan that:
 - Provide specific file paths where possible
 - Clear verification instructions
 - Steps should build on each other logically
+
+**Commit Boundary Guidelines**:
+
+Every step must have a `**Commit**` field. Use `After this step` when the step is independently revertible and the codebase is in a valid state after it completes. Use `With step N` when the next step depends on this one to compile or pass tests, or when together they form a single logical unit of work (e.g. migration + model, endpoint + serializer, schema change + backfill).
+
+When steps are grouped, the *last* step in the group says `After this step — closes group with step N`. Earlier steps in the group say `With step N`.
+
+Commit groups should be visible in the plan summary (see Step 5) so the user can review the grouping before execution starts.
 
 **Step Size**:
 - Good: "Add `enabled` column to `notification_preferences` table"
@@ -193,6 +213,11 @@ Output:
 3. {Step 3 short title}
 ...
 
+**Commit groups**:
+- Step 1 — {reason}
+- Steps 2–3 — {reason why they're grouped}
+- Steps 4–5 — {reason}
+
 **Scope Assessment**: Appropriate size / Substantial / Too large
 {Brief reasoning}
 
@@ -203,7 +228,7 @@ Output:
 **What's Next**:
 
 Review the plan in `implementation-plan.md`. You can:
-- Ask me to refine specific steps
+- Ask me to refine specific steps or commit groupings
 - Request more detail on any step
 - Ask questions about approach
 
@@ -229,6 +254,7 @@ When ready to start implementing, run `/execute-step` to begin step 1.
 6. **Use project patterns**: Follow conventions discovered in the codebase
 7. **Status tracking**: Use [TODO], [IN_PROGRESS], [DONE], [SKIP]
 8. **Update timestamps**: Track when plan is modified
+9. **Commit boundaries**: Every step must have a `**Commit**` field; group steps that cannot stand alone
 
 ## Step Status Format
 
@@ -267,6 +293,11 @@ When ready to start implementing, run `/execute-step` to begin step 1.
 4. Add frontend preferences UI component
 5. Add feature tests for end-to-end preference management
 
+**Commit groups**:
+- Steps 1–2 — migration + model form one logical unit
+- Step 3 — standalone endpoint, independently revertible
+- Steps 4–5 — UI component + feature tests are best reviewed together
+
 **Scope Assessment**: Appropriate size
 5 steps is manageable. Each step is focused and testable.
 
@@ -276,7 +307,7 @@ When ready to start implementing, run `/execute-step` to begin step 1.
 **What's Next**:
 
 Review the plan in `implementation-plan.md`. You can:
-- Ask me to refine specific steps
+- Ask me to refine specific steps or commit groupings
 - Request more detail on any step
 - Ask questions about approach
 

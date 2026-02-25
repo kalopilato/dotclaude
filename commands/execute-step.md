@@ -69,6 +69,7 @@ Read the step details:
 - **Implementation**: Specific changes
 - **Tests**: What to test
 - **Verification**: How to verify
+- **Commit**: Whether this step is a commit point (`After this step`) or continues to a later step (`With step N`)
 
 ### Step 5: Implement
 
@@ -187,11 +188,9 @@ Output:
 - {Verification result 1}
 - {Verification result 2}
 
+{If Commit field says "After this step":}
+
 ### Commit
-
-{See commit guidance below — output one of:}
-
-**Commit now** — this step is self-contained and independently revertible.
 
 ```text
 {subject line — imperative, ≤72 chars, matching project convention}
@@ -200,15 +199,7 @@ Output:
 Omit if the subject line is self-explanatory.}
 ```
 
-{OR}
-
-**Group with step {n+1}** — {brief reason, e.g. "the model in step 2 depends on this migration and they form one logical unit"}. Suggested message when ready:
-
-```text
-{subject line covering both steps}
-
-{body explaining the combined why, if needed}
-```
+{If Commit field says "With step N": omit the Commit section entirely}
 
 **Next**:
 - Review the changes above
@@ -232,28 +223,16 @@ Wait for user to:
 
 Make changes and re-verify before moving on.
 
+## Commit Message Format
 
-## Commit Guidance
-
-At the end of each step, assess whether it's a logical commit point and suggest accordingly.
-
-**Commit now** when:
-
-- The step is independently revertible without breaking other steps
-- Tests pass and the codebase is in a working state
-- The change is atomic (migrations are almost always their own commit)
-
-**Group with next step** when:
-
-- The next step depends on the current state to compile or pass tests
-- The two steps together form a single logical unit of work (e.g. migration + model, endpoint + serializer)
-
-**Message format**:
+Commit boundaries are defined in the plan's `**Commit**` field for each step. When a step is a commit point, draft the message:
 
 Check `git log --oneline` to match the project's commit convention (e.g. conventional commits, ticket-prefixed, etc.).
 
 - **Subject line**: imperative mood, ≤72 chars, describes *what* changed concisely
 - **Body** (only if it adds value): explain *why* — the motivation, trade-off, or context that isn't obvious from reading the diff. Never restate the diff in prose. Omit the body entirely if the subject is self-explanatory.
+
+When a commit covers multiple grouped steps, the subject should reflect the combined scope of all steps in the group.
 
 ## Important Guidelines
 
@@ -291,6 +270,8 @@ This allows later steps to reference earlier work naturally:
 
 ## Example Output
 
+Step 1 (not a commit point — grouped with step 2):
+
 ```markdown
 ## ✅ Step 1 Complete: Add notification_preferences table
 
@@ -314,5 +295,38 @@ This allows later steps to reference earlier work naturally:
 - Review the changes above
 - Run `/execute-step` to continue with step 2: "Add NotificationPreference model"
 ```
+
+Step 2 (commit point — closes group with step 1):
+
+````markdown
+## ✅ Step 2 Complete: Add NotificationPreference model
+
+**Implemented**:
+- Added `NotificationPreference` model with associations and validation
+- Added scopes for querying by type and workspace
+
+**Files Changed**:
+- `app/models/notification_preference.{ext}` - new model
+- `spec/models/notification_preference_spec.{ext}` - model specs
+
+**Tests**:
+- ✅ 6 tests, all passing
+
+**Verification**:
+- ✅ Model loads, associations resolve, validations enforce uniqueness
+
+### Commit
+
+```text
+Add notification_preferences table and model
+
+Introduces the persistence layer for per-user notification preferences.
+Migration and model are committed together as neither is useful without the other.
+```
+
+**Next**:
+- Review the changes above
+- Run `/execute-step` to continue with step 3: "Add API endpoint"
+````
 
 You are ready to implement steps methodically and maintain high code quality!
