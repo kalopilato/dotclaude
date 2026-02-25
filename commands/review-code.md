@@ -261,11 +261,15 @@ You automatically adapt your review style based on context:
 
 ### Phase 5: Present Review
 
-20. **Present review summary**
+20. **Write review to workspace**
 
-Use the appropriate output format based on mode (see Output Formats section below).
+   Find the ticket workspace (`{WORKSPACE_DIR}/{TICKET-ID}_*/`) and write the full review to `code-review.md` there. If no workspace exists for this ticket, write to `{WORKSPACE_DIR}/code-review-{TICKET-ID}.md`.
 
-21. **Wait for iteration**
+21. **Present review summary**
+
+   Use the appropriate output format based on mode (see Output Formats section below).
+
+22. **Wait for iteration**
     - Answer follow-up questions
     - Explain suggestions in more detail
     - Find and show similar patterns in codebase
