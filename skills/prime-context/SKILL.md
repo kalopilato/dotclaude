@@ -1,5 +1,14 @@
 ---
+name: prime-context
 description: Prime context with project structure and documentation
+---
+
+## Configuration
+
+**Workspace Directory**: `.ai-workspace/`
+
+All artifacts are stored in `.ai-workspace/{TICKET-ID}_{slugified-title}/`
+
 ---
 
 # Prime Context

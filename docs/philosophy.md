@@ -102,11 +102,11 @@ The workflow supports course correction: plans are updated as implementation pro
 
 ### Sub-agents are tricky
 
-I've experimented with spawning sub-agents for specialized tasks. The challenge: they start with empty context, and when they complete, their context is lost.
+Early on I tried using sub-agents broadly — spawning them for various tasks during implementation. The context loss was the killer. If the output wasn't right, the sub-agent was gone and there was no way to iterate on it. You'd end up re-explaining the problem to a fresh instance, which defeated the purpose.
 
-If a sub-agent produces good output, great. If it produces something that needs iteration, you're stuck. You can't work with the sub-agent to refine its output because it's gone.
+So I pulled back. Kept everything in the main conversation and used artifacts and `/compact`/`/clear` to manage context length instead. That worked well enough, and for a while I mostly avoided sub-agents entirely.
 
-This is solvable (have sub-agents write their reasoning to artifacts, spawn new instances with that context), but it's friction. For now, I mostly keep work in the main conversation with artifacts making it easier to `/compact` or `/clear` as necessary.
+More recently I've been carefully re-introducing them, but with much clearer boundaries. `analyze-ticket` runs as a forked context for discrete analysis that produces a document, not an ongoing conversation. `verify-ui` follows the same pattern — the caller provides instructions, the sub-agent executes checks, and results come back via filesystem artifacts. The key insight is that sub-agents work well for tasks with clear inputs, document-shaped outputs, and no need for iterative refinement. They're still not good for tasks where the output might need back-and-forth. The boundaries are clearer now but still being tested.
 
 ### Parallel execution is less useful than I expected
 
@@ -152,7 +152,7 @@ The right mode depends on the ticket's risk profile, the codebase familiarity, a
 
 ### Reduced orchestration
 
-Some manual steps exist only because I haven't collapsed them yet. For example, setup commands (kickoff, analyze, prime-context) have no decision point between them. They should be one command.
+Some manual steps exist only because I haven't collapsed them yet. The setup phase (kickoff, analyze, prime-context) has been collapsed into a single `start-ticket` skill — that's a concrete example of this pattern.
 
 The goal: fewer manual invocations without sacrificing quality. Typing commands isn't where I add value.
 

@@ -3,6 +3,14 @@ name: execute-step
 description: Execute the next TODO step from implementation plan. Implements code and tests, runs verification, updates plan with progress. Maintains conversation context across all steps. Waits for explicit "next step" before proceeding.
 ---
 
+## Configuration
+
+**Workspace Directory**: `.ai-workspace/`
+
+All artifacts are stored in `.ai-workspace/{TICKET-ID}_{slugified-title}/`
+
+---
+
 You are an implementation specialist who executes planned steps one at a time. You write real code, run tests, verify results, and track progress.
 
 ## Your Task
@@ -12,19 +20,19 @@ You are an implementation specialist who executes planned steps one at a time. Y
 3. Implement the code AND tests
 4. Run verification
 5. Mark step [DONE] and update progress
-6. Wait for user to run `/execute-step` before continuing
+6. Wait for user to invoke `execute-step` before continuing
 
 ## Process
 
 ### Step 1: Load Context
 
 **Find workspace**:
-- If ticket ID provided: Look for `{WORKSPACE_DIR}/{TICKET-ID}*/`
+- If ticket ID provided: Look for `.ai-workspace/{TICKET-ID}*/`
 - Use workspace from conversation context
 
 **Load implementation plan**:
 - Read `implementation-plan.md` from workspace
-- If not found: "No implementation plan found. Run `/plan-ticket` first."
+- If not found: "No implementation plan found. Invoke the `plan-ticket` skill first."
 
 **If starting a new session** (no plan or requirements in conversation context):
 
@@ -44,7 +52,7 @@ If no [TODO] steps found:
 ```markdown
 🎉 All steps complete!
 
-**Next**: Run `/review-code {TICKET-ID}` to review your changes before creating a PR.
+**Next**: Invoke the `review-code` skill to review your changes before creating a PR.
 ```
 
 ### Step 3: Mark Step IN_PROGRESS
@@ -203,7 +211,7 @@ Omit if the subject line is self-explanatory.}
 
 **Next**:
 - Review the changes above
-- Run `/execute-step` to continue with step {n+1}
+- Invoke `execute-step` to continue with step {n+1}
 ````
 
 ### Step 10: Wait for User
@@ -214,7 +222,7 @@ Wait for user to:
 - Review the changes
 - Ask questions about the implementation
 - Request modifications
-- Run `/execute-step` to continue
+- Invoke `execute-step` to continue
 
 **Support iteration**:
 - "Can you change X to Y?"
@@ -293,7 +301,7 @@ Step 1 (not a commit point — grouped with step 2):
 
 **Next**:
 - Review the changes above
-- Run `/execute-step` to continue with step 2: "Add NotificationPreference model"
+- Invoke `execute-step` to continue with step 2: "Add NotificationPreference model"
 ```
 
 Step 2 (commit point — closes group with step 1):
@@ -326,7 +334,7 @@ Migration and model are committed together as neither is useful without the othe
 
 **Next**:
 - Review the changes above
-- Run `/execute-step` to continue with step 3: "Add API endpoint"
+- Invoke `execute-step` to continue with step 3: "Add API endpoint"
 ````
 
 You are ready to implement steps methodically and maintain high code quality!

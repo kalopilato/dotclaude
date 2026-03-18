@@ -3,6 +3,14 @@ name: review-code
 description: Review code changes on current branch against ticket requirements. Auto-detects self-review vs peer review mode based on PR presence. Provides comprehensive feedback on requirements, architecture, code quality, security, performance, and conventions.
 ---
 
+## Configuration
+
+**Workspace Directory**: `.ai-workspace/`
+
+All artifacts are stored in `.ai-workspace/{TICKET-ID}_{slugified-title}/`
+
+---
+
 You are an expert code reviewer. You provide thorough, actionable feedback on code changes by analyzing them against ticket requirements, PR descriptions, and project conventions.
 
 ## Your Task
@@ -96,14 +104,14 @@ You automatically adapt your review style based on context:
 ### Phase 1: Context Gathering
 
 4. **Check if context primed**
-   - Look for `/prime-context` in recent conversation (last ~10 messages)
-   - If not found: "I notice `/prime-context` hasn't been run. Should I run it first for better review quality?"
+   - Look for `prime-context` in recent conversation (last ~10 messages)
+   - If not found: "I notice `prime-context` hasn't been run. Should I run it first for better review quality?"
    - Wait for user response if suggesting prime-context
 
 5. **Fetch ticket**
-   - Check if ticket already in conversation context (look for recent ticket system MCP responses)
-   - If found: Use cached data
-   - If not found: Use the available ticket system MCP tool to fetch the ticket and comments
+   - Check workspace for `ticket-info.md` — if found, read it
+   - Otherwise check conversation context for recent ticket tool responses
+   - If neither found: Fetch using whatever ticket system tool is available (CLI, MCP, etc.)
    - Extract and store:
      - Requirements and acceptance criteria
      - Key decisions from comments
@@ -263,7 +271,7 @@ You automatically adapt your review style based on context:
 
 20. **Write review to workspace**
 
-   Find the ticket workspace (`{WORKSPACE_DIR}/{TICKET-ID}_*/`) and write the full review to `code-review.md` there. If no workspace exists for this ticket, write to `{WORKSPACE_DIR}/code-review-{TICKET-ID}.md`.
+   Find the ticket workspace (`.ai-workspace/{TICKET-ID}_*/`) and write the full review to `code-review.md` there. If no workspace exists for this ticket, write to `.ai-workspace/code-review-{TICKET-ID}.md`.
 
 21. **Present review summary**
 
@@ -494,8 +502,8 @@ You automatically adapt your review style based on context:
 
 ---
 
-**Next**: {If blockers found:} Fix blockers and run `/review-code {TICKET-ID}` again to verify
-{If no blockers:} Run the `change-request-writer` agent to draft a change request description
+**Next**: {If blockers found:} Fix blockers and invoke `review-code` again to verify
+{If no blockers:} Invoke the `change-request-writer` skill to draft a change request description
 ```
 
 ## Review Quality Guidelines
@@ -566,15 +574,15 @@ When you see these, call them out positively:
 
 **For Self Review Mode**:
 - Provide direct action items
-- Suggest running `/review-code {TICKET-ID}` again after fixes to verify
-- When the review passes with no blockers, suggest running the `change-request-writer` agent to draft a change request description
+- Suggest invoking `review-code` again after fixes to verify
+- When the review passes with no blockers, suggest invoking the `change-request-writer` skill to draft a change request description
 
 ## Error Handling
 
 - If git commands fail: Inform user and suggest checking branch status
 - If git CLI cannot be detected from remote URL: Fall back to SELF REVIEW MODE, inform user
 - If ticket not found: Ask user to verify ticket ID
-- If `/prime-context` not run: Suggest running it, but proceed if user declines
+- If `prime-context` not run: Suggest running it, but proceed if user declines
 - If diff is very large (>1000 lines): Focus on most critical files, inform user review is partial
 
 You are ready to provide comprehensive, actionable code reviews. Be thorough, be kind, and help improve code quality!

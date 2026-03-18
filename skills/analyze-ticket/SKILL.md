@@ -1,6 +1,15 @@
 ---
 name: analyze-ticket
-description: Extract requirements from ticket and identify gaps. Creates requirements-analysis.md and questions.md. Uses cached ticket from conversation context if available.
+description: Extract requirements from ticket and identify gaps. Creates requirements-analysis.md and questions.md. Reads from workspace ticket-info.md if available, otherwise fetches directly.
+context: fork
+---
+
+## Configuration
+
+**Workspace Directory**: `.ai-workspace/`
+
+All artifacts are stored in `.ai-workspace/{TICKET-ID}_{slugified-title}/`
+
 ---
 
 You are a technical analyst specializing in breaking down software requirements. You extract requirements from tickets and prepare them for implementation planning.
@@ -19,16 +28,13 @@ Analyze a ticket to:
 
 ### Step 1: Load Ticket Information
 
-**Check conversation context first**:
+**Resolution order** — use the first source that succeeds:
 
-- Look for recent ticket system MCP tool responses
-- If found in recent conversation: Use cached data (saves API calls)
-- If not found: Fetch using the configured ticket system tool
-
-**If ticket ID provided** (e.g., `PROJ-752`):
-- Look for workspace: `{WORKSPACE_DIR}/{TICKET-ID}*/`
-- If workspace found: Use it
-- If workspace not found: "No workspace found for {TICKET-ID}. Run `/kickoff-ticket` first to create workspace."
+1. **Workspace file**: Look for `.ai-workspace/{TICKET-ID}*/ticket-info.md` — if found, read it
+2. **Conversation context**: Look for recent ticket tool responses already in context
+3. **Fetch directly**: Use whatever ticket system tool is available (CLI, MCP, etc.) to fetch the ticket (issue + comments)
+   - If no ticket ID provided and no source found: "Please provide a ticket ID."
+   - Create workspace `.ai-workspace/{TICKET-ID}_{slugified-title}/` if it doesn't exist and write `ticket-info.md`
 
 **What to extract**:
 - Title and description
@@ -36,6 +42,42 @@ Analyze a ticket to:
 - Comments (key decisions, clarifications, scope changes)
 - Related tickets (if referenced)
 - Labels and status
+
+### Step 1.5: Fetch Related Tickets
+
+Scan the ticket description and comments for references to other tickets (IDs, URLs, explicit links).
+
+**Fetch tickets that are**:
+- Explicitly called out as dependencies or blockers
+- Referenced as prior art or related work ("see PROJ-98 for how we handled X")
+- Linked as parent/child/epic relationships
+
+**Skip tickets that are**:
+- Passing mentions without context
+- Status updates referencing other work
+- Already-closed unrelated work
+
+For each relevant ticket, fetch it using whatever ticket system tool is available. Write a single `related-tickets.md` to the workspace:
+
+```markdown
+# Related Tickets: {TICKET-ID}
+
+## {RELATED-ID}: {Title}
+
+**URL**: {URL}
+**Relationship**: {dependency / prior art / parent epic / etc.}
+**Why relevant**: {1 sentence on why this matters for the current ticket}
+
+### Key Details
+
+{Concise summary of the relevant parts — not the full ticket, just what matters for context}
+
+---
+
+{Repeat for each related ticket}
+```
+
+If no related tickets are worth fetching, skip this step and do not create the file.
 
 ### Step 2: Analyze Requirements
 
@@ -152,6 +194,12 @@ If **Needs refinement**, include a `## Ticket Readiness` section in `requirement
 - {Decision 1 with context}
 - {Decision 2}
 
+## Related Tickets
+
+{Omit this section if no related tickets were fetched}
+
+- **{RELATED-ID}**: {1-line summary of relevance}
+
 ## What Success Looks Like
 
 - {Acceptance criterion 1}
@@ -211,7 +259,7 @@ Output:
 ```markdown
 ## Analysis Complete: {TICKET-ID}
 
-**Workspace**: `{WORKSPACE_DIR}/{TICKET-ID}_{title}/`
+**Workspace**: `.ai-workspace/{TICKET-ID}_{title}/`
 
 **Summary**: {2-3 sentences about what needs to be built}
 
@@ -224,6 +272,7 @@ Output:
 **Files Created**:
 - `requirements-analysis.md` - Requirements breakdown ({X} lines)
 - `questions.md` - {X} questions requiring confirmation
+- `related-tickets.md` - {X} related tickets fetched (if any)
 
 **Questions Summary**:
 {List question titles if any, or "No blocking questions"}
@@ -231,7 +280,7 @@ Output:
 **What's Next**:
 
 1. Review `questions.md` and provide answers/confirmation
-2. Once confirmed, run `/plan-ticket` to create implementation plan
+2. Once confirmed, invoke the `plan-ticket` skill to create implementation plan
 
 The ticket information remains in conversation context for planning.
 ```
@@ -245,7 +294,7 @@ The ticket information remains in conversation context for planning.
 5. **Minimal questions**: Only ask blockers — questions where no reasonable assumption can substitute
 6. **Assess readiness**: Flag tickets that need refinement before implementation starts
 7. **Under 200 lines**: Keep `requirements-analysis.md` tight
-8. **Stay in conversation**: Maintain context for next command
+8. **Stay in conversation**: Maintain context for next skill
 
 ## What NOT to Do
 
@@ -271,7 +320,7 @@ The ticket information remains in conversation context for planning.
 ```markdown
 ## Analysis Complete: PROJ-142
 
-**Workspace**: `{WORKSPACE_DIR}/PROJ-142_add-email-notification-preferences/`
+**Workspace**: `.ai-workspace/PROJ-142_add-email-notification-preferences/`
 
 **Summary**: Allow users to configure which email notifications they receive per workspace. Requires new preferences table, settings UI, and updates to the notification dispatch logic.
 
@@ -289,24 +338,11 @@ Multiple components involved (DB, backend, frontend, tests) but clear scope.
 **What's Next**:
 
 1. Review `questions.md` and provide answers/confirmation
-2. Once confirmed, run `/plan-ticket` to create implementation plan
+2. Once confirmed, invoke the `plan-ticket` skill to create implementation plan
 ```
 
 ## Error Handling
 
-- **No ticket in context and no ticket ID provided**: "Please provide a ticket ID or run `/kickoff-ticket` first."
+- **No ticket ID provided and no source found**: "Please provide a ticket ID."
 - **Ticket not found**: "Could not find ticket {ID}. Please verify the ticket ID."
-- **No workspace found**: "No workspace found for {TICKET-ID}. Run `/kickoff-ticket` first."
-- **Ticket system tool not available**: "No ticket system MCP tool is available. Please ensure a ticket system MCP is configured and connected."
-
-## Conversation Context
-
-After this command completes, the following should remain in conversation context:
-- Ticket details (issue + comments)
-- Requirements extracted
-- Questions identified
-- Workspace location
-
-This allows `/plan-ticket` to use cached information without re-fetching.
-
-You are ready to extract requirements efficiently and prepare tickets for implementation planning!
+- **Ticket system tool not available**: "No ticket system tool is available. Please ensure a ticket system CLI or MCP is configured."

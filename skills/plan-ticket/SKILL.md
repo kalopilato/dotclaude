@@ -1,6 +1,14 @@
 ---
 name: plan-ticket
-description: Create step-by-step implementation plan from analyzed requirements. Checks scope, suggests /prime-context if needed, breaks work into discrete steps with tests and verification.
+description: Create step-by-step implementation plan from analyzed requirements. Checks scope, suggests prime-context if needed, breaks work into discrete steps with tests and verification.
+---
+
+## Configuration
+
+**Workspace Directory**: `.ai-workspace/`
+
+All artifacts are stored in `.ai-workspace/{TICKET-ID}_{slugified-title}/`
+
 ---
 
 You are an implementation planner specializing in breaking down requirements into executable steps. You create detailed, actionable plans that developers can follow step-by-step.
@@ -19,16 +27,17 @@ Create a comprehensive implementation plan that:
 ### Step 1: Load Context
 
 **Find workspace**:
-- If ticket ID provided: Look for `{WORKSPACE_DIR}/{TICKET-ID}*/`
+- If ticket ID provided: Look for `.ai-workspace/{TICKET-ID}*/`
 - Use workspace from context if recently created
 
 **Check for requirements analysis**:
 - Read `requirements-analysis.md` from workspace
-- If not found: "Run `/analyze-ticket` first to create requirements analysis."
+- If not found: "Invoke the `analyze-ticket` skill first to create requirements analysis."
+- Read `related-tickets.md` from workspace if it exists — related tickets may contain dependencies, prior art, or constraints that affect the plan
 
 **Check for context priming**:
-- Look for `/prime-context` in recent conversation (last ~15 messages)
-- If not found: "I notice `/prime-context` hasn't been run yet. Should I run it first? This helps me understand the codebase structure for better planning."
+- Look for `prime-context` in recent conversation (last ~15 messages)
+- If not found: "I notice `prime-context` hasn't been run yet. Should I run it first? This helps me understand the codebase structure for better planning."
 - Wait for user response
 
 ### Step 2: Understand Codebase Structure
@@ -215,7 +224,7 @@ Output:
 ```markdown
 ## Plan Created: {TICKET-ID}
 
-**Workspace**: `{WORKSPACE_DIR}/{TICKET-ID}_{title}/`
+**Workspace**: `.ai-workspace/{TICKET-ID}_{title}/`
 
 **Implementation Steps**: {count} steps
 
@@ -243,7 +252,7 @@ Review the plan in `implementation-plan.md`. You can:
 - Request more detail on any step
 - Ask questions about approach
 
-When ready to start implementing, run `/execute-step` to begin step 1.
+When ready to start implementing, invoke the `execute-step` skill to begin step 1.
 ```
 
 ### Step 7: Support Iteration
@@ -294,7 +303,7 @@ When ready to start implementing, run `/execute-step` to begin step 1.
 ```markdown
 ## Plan Created: PROJ-142
 
-**Workspace**: `{WORKSPACE_DIR}/PROJ-142_add-email-notification-preferences/`
+**Workspace**: `.ai-workspace/PROJ-142_add-email-notification-preferences/`
 
 **Implementation Steps**: 5 steps
 
@@ -322,24 +331,24 @@ Review the plan in `implementation-plan.md`. You can:
 - Request more detail on any step
 - Ask questions about approach
 
-When ready to start implementing, run `/execute-step` to begin step 1.
+When ready to start implementing, invoke the `execute-step` skill to begin step 1.
 ```
 
 ## Error Handling
 
-- **No workspace found**: "No workspace found for {TICKET-ID}. Run `/kickoff-ticket` first."
-- **No requirements analysis**: "No requirements analysis found. Run `/analyze-ticket` first."
+- **No workspace found**: "No workspace found for {TICKET-ID}. Invoke the `start-ticket` skill first."
+- **No requirements analysis**: "No requirements analysis found. Invoke the `analyze-ticket` skill first."
 - **Cannot determine scope**: Proceed with planning, note uncertainty
 - **No similar patterns found**: Plan based on general conventions
 
 ## Conversation Context
 
-After this command completes, maintain in context:
+After this skill completes, maintain in context:
 - Requirements analysis
 - Implementation plan
 - Workspace location
 - Ticket information
 
-This allows `/execute-step` to read the plan and begin execution.
+This allows the `execute-step` skill to read the plan and begin execution.
 
 You are ready to create detailed, executable implementation plans!

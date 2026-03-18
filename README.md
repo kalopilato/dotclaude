@@ -16,22 +16,17 @@ My current, (mostly) portable Claude-assisted engineering workflow to help turn 
 
 ---
 
-## Commands
+## Skills
 
-| Command | Purpose | Output |
+| Skill | Purpose | Output |
 | --- | --- | --- |
-| `/kickoff-ticket` | Fetch ticket, create workspace | `ticket-info.md` |
-| `/analyze-ticket` | Extract requirements, surface gaps and blockers | `requirements-analysis.md`, `questions.md` |
-| `/prime-context` | Load project structure and docs into context | — |
-| `/plan-ticket` | Create step-by-step implementation plan | `implementation-plan.md` |
-| `/execute-step` | Implement one step with verification | Updates `implementation-plan.md` |
-| `/review-code` | Self-review against requirements and standards | — |
-
-## Agent
-
-| Agent | Purpose | Output |
-| --- | --- | --- |
+| `start-ticket` | Fetch ticket, create workspace, analyze requirements, prime context | `ticket-info.md`, `requirements-analysis.md`, `questions.md` |
+| `plan-ticket` | Create step-by-step implementation plan | `implementation-plan.md` |
+| `execute-step` | Implement one step with verification | Updates `implementation-plan.md` |
+| `review-code` | Self-review against requirements and standards | `code-review.md` |
 | `change-request-writer` | Draft PR/MR description from diff and ticket context | `change-request-draft.md` |
+| `prime-context` | Load project structure and docs into context | — |
+| `analyze-ticket` | Extract requirements, surface gaps and blockers | `requirements-analysis.md`, `questions.md` |
 
 ---
 
@@ -39,29 +34,24 @@ My current, (mostly) portable Claude-assisted engineering workflow to help turn 
 
 ```mermaid
 flowchart TD
-    PC("/prime-context")
-    KT("/kickoff-ticket")
-    AT("/analyze-ticket")
-    PT("/plan-ticket")
-    ES("/execute-step")
-    RC("/review-code")
-    CRW(["change-request-writer agent"])
+    ST(["start-ticket"])
+    PT(["plan-ticket"])
+    ES(["execute-step"])
+    RC(["review-code"])
+    CRW(["change-request-writer"])
 
     U1["review analysis · answer questions"]
-    U2["review plan · iterate with agent"]
+    U2["review plan · iterate if needed"]
     U3["review changes · iterate if needed"]
     U4["fix issues"]
 
-    D1["ticket-info.md"]
-    D2["requirements-analysis.md · questions.md"]
-    D3["implementation-plan.md"]
-    D4["code-review.md"]
-    D5["change-request-draft.md"]
+    D1["ticket-info.md · requirements-analysis.md · questions.md"]
+    D2["implementation-plan.md"]
+    D3["code-review.md"]
+    D4["change-request-draft.md"]
 
-    KT --> AT
-    AT --> U1
-    U1 --> PC
-    PC --> PT
+    ST --> U1
+    U1 --> PT
     PT --> U2
     U2 --> ES
     ES --> U3
@@ -71,66 +61,63 @@ flowchart TD
     U4 -->|"re-review"| RC
     RC -.-> CRW
 
-    KT -.-> D1
-    AT -.-> D2
-    PT -.-> D3
-    ES -. updates .-> D3
-    RC -.-> D4
-    CRW -.-> D5
+    ST -.-> D1
+    PT -.-> D2
+    ES -. updates .-> D2
+    RC -.-> D3
+    CRW -.-> D4
 
-    classDef cmd fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    classDef skill fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
     classDef user fill:#f3f4f6,stroke:#9ca3af,color:#374151
-    classDef agent fill:#dcfce7,stroke:#16a34a,color:#14532d
     classDef doc fill:#fef9c3,stroke:#ca8a04,color:#713f12
-    class PC,KT,AT,PT,ES,RC cmd
+    class ST,PT,ES,RC,CRW skill
     class U1,U2,U3,U4 user
-    class CRW agent
-    class D1,D2,D3,D4,D5 doc
+    class D1,D2,D3,D4 doc
 ```
 
 ## Typical session
 
 ```bash
-/kickoff-ticket PROJ-142        # Fetch ticket, create workspace on disk
-/analyze-ticket                 # Extract requirements, flag gaps
+# Start ticket: fetches ticket, creates workspace, analyzes requirements, primes context
+start-ticket PROJ-142
 
 # → review analysis, answer any questions, add any context missing from the ticket
 
-/prime-context                  # Load project structure
-/plan-ticket                    # Create implementation plan
+plan-ticket                     # Create implementation plan
 
-# → review plan, refine if needed, iterate with the agent until it's solid
+# → review plan, refine if needed, iterate until it's solid
 
-/execute-step                   # Implement step 1
+execute-step                    # Implement step 1
 
-# → review, iterate with the agent if needed, agent updates plan as we go
+# → review, iterate if needed, skill updates plan as we go
 
-/execute-step                   # Implement step 2 ...
+execute-step                    # Implement step 2 ...
 
-# → review, iterate with the agent if needed, agent updates plan as we go
+# → review, iterate if needed, skill updates plan as we go
 
 # → repeat until complete
 
-/review-code                    # Self-review before PR - using existing or clean context
+review-code                     # Self-review before PR
 
-# → invoke change-request-writer agent
+# → invoke change-request-writer
 ```
 
 ## Generated workspace structure
 
 Each ticket creates a workspace directory in your project, with artifacts generated as we progress through the workflow:
 
-```
+```text
 .ai-workspace/
 └── PROJ-142_add-email-preferences/
     ├── ticket-info.md              # Ticket details (for session resume)
     ├── requirements-analysis.md    # Requirements + readiness assessment
     ├── questions.md                # Blockers and open questions
+    ├── related-tickets.md          # Related/dependent tickets (if any)
     ├── implementation-plan.md      # Steps with [TODO]/[DONE] tracking and evaluation of magnitude/complexity
     └── change-request-draft.md     # Generated PR description
 ```
 
-These files enable session resume - return to a ticket in a new conversation and `/execute-step` can pick up where you left off.
+These files enable session resume - return to a ticket in a new conversation and `execute-step` can pick up where you left off.
 
 ---
 
@@ -144,12 +131,11 @@ git clone https://github.com/kalopilato/dotclaude.git
 cd dotclaude
 
 # Copy to your Claude config
-cp -r commands ~/.claude/
-cp -r agents ~/.claude/
+cp -r skills ~/.claude/
 cp CLAUDE.md ~/.claude/
 ```
 
-Commands are available as `/kickoff-ticket`, `/execute-step`, etc in any new conversation.
+Skills are available in any new conversation.
 
 ### Prerequisites
 
@@ -186,12 +172,6 @@ git config --global core.excludesfile ~/.gitignore_global
 
 ## Roadmap
 
-**Near term:**
-
-- Genericize tool references (ticket system, git provider)
-- Consolidate setup commands (`/start-ticket` combining kickoff + analyze + prime)
-- Migrate to Claude skills for better structure
-
 **Next iteration:**
 
 - Verification agents (requirements, standards, adversarial review)
@@ -206,18 +186,26 @@ For more thinking on where this is heading, see [docs/philosophy.md](docs/philos
 
 ## Claude Directory structure
 
-```
+```text
 ~/.claude/
 ├── CLAUDE.md                       # Workspace directory config
-├── commands/
-│   ├── prime-context.md
-│   ├── kickoff-ticket.md
-│   ├── analyze-ticket.md
-│   ├── plan-ticket.md
-│   ├── execute-step.md
-│   └── review-code.md
-└── agents/
-    └── change-request-writer.md
+└── skills/
+    ├── start-ticket/
+    │   └── SKILL.md
+    ├── analyze-ticket/
+    │   └── SKILL.md
+    ├── plan-ticket/
+    │   └── SKILL.md
+    ├── execute-step/
+    │   └── SKILL.md
+    ├── review-code/
+    │   └── SKILL.md
+    ├── change-request-writer/
+    │   └── SKILL.md
+    ├── prime-context/
+    │   └── SKILL.md
+    └── verify-ui/
+        └── SKILL.md
 ```
 
 ---
