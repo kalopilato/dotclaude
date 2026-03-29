@@ -133,6 +133,7 @@ Create a comprehensive implementation plan that:
 ```markdown
 # Implementation Plan: {TICKET-ID}
 
+**Last agent commit:** (none yet)
 **Ticket**: {URL}
 **Requirements**: See requirements-analysis.md
 **Total Steps**: {count}
@@ -156,7 +157,7 @@ Create a comprehensive implementation plan that:
 **Verification**:
 - {How to verify this step works — automated test command and/or manual check}
 
-**Commit**: After this step — {reason, e.g. "standalone migration, independently revertible"}
+**Commit**: After this step [auto] — {reason, e.g. "standalone migration, independently revertible"}
 
 ---
 
@@ -172,7 +173,7 @@ Create a comprehensive implementation plan that:
 
 ...
 
-**Commit**: After this step — closes group with step 2
+**Commit**: After this step [review] — closes group with step 2
 
 ---
 
@@ -195,11 +196,38 @@ Create a comprehensive implementation plan that:
 
 **Commit Boundary Guidelines**:
 
+Commit boundary format:
+```
+**Commit**: After this step [auto] — <one-line reason this group is low-risk>
+**Commit**: After this step [review] — <one-line reason human review is warranted>
+**Commit**: With step N — <reason these steps must commit together>
+```
+
+`[auto]` and `[review]` appear **only** on `After this step` lines — these are the group boundaries. `With step N` lines are within a group and do not get a classification. The reason after the dash must be present and meaningful — not a placeholder.
+
 Every step must have a `**Commit**` field. Use `After this step` when the step is independently revertible and the codebase is in a valid state after it completes. Use `With step N` when the next step depends on this one to compile or pass tests, or when together they form a single logical unit of work (e.g. migration + model, endpoint + serializer, schema change + backfill).
 
-When steps are grouped, the *last* step in the group says `After this step — closes group with step N`. Earlier steps in the group say `With step N`.
+When steps are grouped, the *last* step in the group says `After this step [auto] — closes group with step N` or `After this step [review] — closes group with step N`. Earlier steps in the group say `With step N`.
 
 Commit groups should be visible in the plan summary (see Step 6) so the user can review the grouping before execution starts.
+
+**Classifying commit groups**:
+
+Default to `[review]`. Only classify a group `[auto]` when ALL of the following are true:
+- The changes follow a clear, established pattern already in the codebase
+- No new files, database tables, routes, or public interfaces are introduced
+- Tests are straightforward (no complex mocking, no integration concerns)
+- The group contains 1–3 steps maximum
+
+Classify as `[review]` when any of the following apply:
+- New migration, schema change, or data model change
+- New route or API endpoint
+- New pattern not yet present in the codebase
+- Complex logic or non-trivial edge cases
+- 4 or more steps in the group
+- Any uncertainty about correctness
+
+The human can change any classification during plan review, before execution begins.
 
 **Step Size**:
 - Good: "Add `enabled` column to `notification_preferences` table"
@@ -252,7 +280,7 @@ Review the plan in `implementation-plan.md`. You can:
 - Request more detail on any step
 - Ask questions about approach
 
-When ready to start implementing, invoke the `execute-step` skill to begin step 1.
+Note that commit groups are classified `[auto]` or `[review]` — you can change any classification before execution begins. Use `run-plan` instead of `execute-step` to execute the plan with checkpoint mode.
 ```
 
 ### Step 7: Support Iteration
@@ -331,7 +359,7 @@ Review the plan in `implementation-plan.md`. You can:
 - Request more detail on any step
 - Ask questions about approach
 
-When ready to start implementing, invoke the `execute-step` skill to begin step 1.
+Note that commit groups are classified `[auto]` or `[review]` — you can change any classification before execution begins. Use `run-plan` instead of `execute-step` to execute the plan with checkpoint mode.
 ```
 
 ## Error Handling
